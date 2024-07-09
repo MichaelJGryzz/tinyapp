@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8081; // default port 8080
+const PORT = 8081; // default port 8081
 
 app.set("view engine", "ejs");
 
@@ -9,9 +9,16 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com",
 };
 
+// route handler to render a page listing all URLs
 app.get("/urls", (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+// route handler to render details of a specific URL based on its ID
+app.get("/urls/:id", (req, res) => {
+  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
+  res.render("urls_show", templateVars);
 });
 
 app.get("/", (req, res) => {
