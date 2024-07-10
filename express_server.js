@@ -25,6 +25,9 @@ app.get("/urls/new", (req, res) => {
 
 // route handler to log the POST request body and respond with 'Ok'
 app.post("/urls", (req, res) => {
+  const shortURL = generatRandomString(); // Generate a 6 digit alphanumeric short URL ID
+  const longURL = req.body.longURL; // Extract the long URL from the requets body
+  urlDatabase[shortURL] = longURL; // Save the long URL and the short URL to the urlDatabase
   console.log(req.body); // Log the POST request body to the console
   res.send("Ok"); // Respond with 'Ok' (we will replace this)
 });
