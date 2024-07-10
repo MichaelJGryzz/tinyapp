@@ -34,14 +34,23 @@ app.post("/urls", (req, res) => {
 
 // route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
-  const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
-  res.render("urls_show", templateVars);
+  const longURL = urlDatabase[req.params.id]; // Get the long URL from the urlDatabase using the short URL ID
+  if (longURL) {
+    const templateVars = { id: req.params.id, longURL };
+    res.render("urls_show", templateVars);
+  } else {
+    res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+  }
 });
 
 // route handler to redirect short URL requests to the corresponding long URL
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id] // get the long URL from the urlDatabase using the short URL ID
-  res.redirect(longURL);
+  const longURL = urlDatabase[req.params.id] // Get the long URL from the urlDatabase using the short URL ID
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+  }
 });
 
 app.get("/urls.json", (req, res) => {
