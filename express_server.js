@@ -17,6 +17,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
+// route handler to log the POST request body and respond with 'Ok'
+app.post("/urls", (req, res) => {
+  console.log(req.body); // Log the POST request body to the console
+  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+});
+
 // route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
   const templateVars = { id: req.params.id, longURL: urlDatabase[req.params.id] };
