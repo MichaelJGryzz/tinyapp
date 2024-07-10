@@ -38,6 +38,12 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+// route handler to redirect short URL requests to the corresponding long URL
+app.get("/u/:id", (req, res) => {
+  const longURL = urlDatabase[req.params.id] // get the long URL from the urlDatabase using the short URL ID
+  res.redirect(longURL);
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
