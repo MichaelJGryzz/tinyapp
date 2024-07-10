@@ -18,7 +18,7 @@ app.set("view engine", "ejs");
 // Express's built in middleware function that converts the body from a Buffer to a string that we can read
 app.use(express.urlencoded({ extended: true }));
 
-// route handler to render the "urls_new.ejs" templaye in the browser and present the form to the user
+// route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
