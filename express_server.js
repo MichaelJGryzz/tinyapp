@@ -2,6 +2,12 @@ const express = require("express");
 const app = express();
 const PORT = 8081; // default port 8081
 
+// function to generate a random string of 6 alphanumeric characters
+const generatRandomString = function() {
+  const uniqueId = Math.random().toString(36).substring(2, 8);
+  return uniqueId;
+}
+
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
