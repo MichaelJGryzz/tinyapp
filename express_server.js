@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8081; // default port 8081
 
 // function to generate a random string of 6 alphanumeric characters
-const generatRandomString = function() {
+const generateRandomString = function() {
   const uniqueId = Math.random().toString(36).substring(2, 8);
   return uniqueId;
 }
@@ -25,10 +25,9 @@ app.get("/urls/new", (req, res) => {
 
 // route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
-  const shortURL = generatRandomString(); // Generate a 6 digit alphanumeric short URL ID
+  const shortURL = generateRandomString(); // Generate a 6 digit alphanumeric short URL ID
   const longURL = req.body.longURL; // Extract the long URL from the request body
   urlDatabase[shortURL] = longURL; // Save the long URL and the short URL to the urlDatabase
-  console.log(`${shortURL}: ${longURL}`); // Log the "id"-"longURL" key-value pair to the console
   res.redirect(`/urls/${shortURL}`); // Redirect to "urls/:id"
 });
 
