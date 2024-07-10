@@ -23,13 +23,13 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 
-// route handler to log the POST request body and respond with 'Ok'
+// route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
   const shortURL = generatRandomString(); // Generate a 6 digit alphanumeric short URL ID
-  const longURL = req.body.longURL; // Extract the long URL from the requets body
+  const longURL = req.body.longURL; // Extract the long URL from the request body
   urlDatabase[shortURL] = longURL; // Save the long URL and the short URL to the urlDatabase
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  console.log(`${shortURL}: ${longURL}`); // Log the "id"-"longURL" key-value pair to the console
+  res.redirect(`/urls/${shortURL}`); // Redirect to "urls/:id"
 });
 
 // route handler to render details of a specific URL based on its ID
