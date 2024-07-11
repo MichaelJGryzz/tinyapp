@@ -31,6 +31,13 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); // Redirect to "urls/:id"
 });
 
+// route handler to delete a specific URL resource based on its ID and redirect to "/urls"
+app.post("/urls/:id/delete", (req, res) => {
+  const shortURL = req.params.id;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
+})
+
 // route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
   const longURL = urlDatabase[req.params.id]; // Get the long URL from the urlDatabase using the short URL ID
