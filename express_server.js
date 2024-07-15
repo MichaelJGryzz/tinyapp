@@ -68,6 +68,14 @@ app.get("/u/:id", (req, res) => {
   }
 });
 
+// Login route handler
+app.post("/login", (req, res) => {
+  const username = req.body.username;
+  res.cookie("username", username);
+  res.redirect("/urls");
+})
+
+// route handler to redner a JSON object listing all URLs
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
