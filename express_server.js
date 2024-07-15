@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8081; // default port 8081
 
@@ -17,6 +18,9 @@ app.set("view engine", "ejs");
 
 // Express's built in middleware function that converts the body from a Buffer to a string that we can read
 app.use(express.urlencoded({ extended: true }));
+
+// Middleware function that helps use read the values from the cookies
+app.use(cookieParser());
 
 // route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
