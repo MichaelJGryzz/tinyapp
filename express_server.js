@@ -24,7 +24,11 @@ app.use(cookieParser());
 
 // route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  // Retrieve the username from the cookies sent by the client
+  const templateVars = {
+    username: req.cookies["username"]
+  };
+  res.render("urls_new", templateVars);
 });
 
 // route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
@@ -37,6 +41,7 @@ app.post("/urls", (req, res) => {
 
 // route handler to delete a specific URL resource based on its ID and redirect to "/urls"
 app.post("/urls/:id/delete", (req, res) => {
+  const username = req.cookies["username"];
   const shortURL = req.params.id;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
@@ -44,6 +49,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // route handler to update a specific URL based on its ID and redirect to "/urls"
 app.post("/urls/:id", (req, res) => {
+  const username = req.cookies["username"];
   const shortURL = req.params.id;
   const newLongURL = req.body.longURL;
   urlDatabase[shortURL] = newLongURL;
@@ -53,9 +59,14 @@ app.post("/urls/:id", (req, res) => {
 
 // route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
+  const username = req.cookies["username"]; // Retrieve the username from the cookies sent by the client
   const longURL = urlDatabase[req.params.id]; // Get the long URL from the urlDatabase using the short URL ID
   if (longURL) {
-    const templateVars = { id: req.params.id, longURL };
+    const templateVars = { 
+      username,
+      id: req.params.id,
+      longURL
+    };
     res.render("urls_show", templateVars);
   } else {
     res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
@@ -86,7 +97,10 @@ app.get("/urls.json", (req, res) => {
 
 // route handler to render a page listing all URLs
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = {
+    username: req.cookies["username"],
+    urls: urlDatabase 
+  };
   res.render("urls_index", templateVars);
 });
 
