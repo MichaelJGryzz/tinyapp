@@ -18,8 +18,11 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
       <% if (username) { %>
-        <div class= "ml-auto">
+        <div class= "ml-auto d-flex align-items-center">
           <span class="nav-item mr-2" style="color: black;">Logged in as: <%= username %>!</span>
+          <form class="form-inline" action="/logout" method="POST">
+            <button class="btn btn-outline-light" type="submit">Log Out</button>
+          </form>
         </div>
       <% } else { %>
         <form class="form-inline ml-auto" action="/login" method="POST">
