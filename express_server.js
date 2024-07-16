@@ -90,6 +90,12 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 })
 
+// Logout route handler
+app.post("/logout", (req, res) => {
+  res.clearCookie("username"); // Clear username cookie
+  res.redirect("/urls");
+})
+
 // route handler to redner a JSON object listing all URLs
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
