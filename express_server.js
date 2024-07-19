@@ -37,9 +37,10 @@ app.use(cookieParser());
 
 // route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
-  // Retrieve the username from the cookies sent by the client
+  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const user = users[userId]; // Retrieve the user object from the users database using the user_id
   const templateVars = {
-    username: req.cookies["username"]
+    user
   };
   res.render("urls_new", templateVars);
 });
@@ -54,7 +55,6 @@ app.post("/urls", (req, res) => {
 
 // route handler to delete a specific URL resource based on its ID and redirect to "/urls"
 app.post("/urls/:id/delete", (req, res) => {
-  const username = req.cookies["username"];
   const shortURL = req.params.id;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
@@ -62,7 +62,6 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // route handler to update a specific URL based on its ID and redirect to "/urls"
 app.post("/urls/:id", (req, res) => {
-  const username = req.cookies["username"];
   const shortURL = req.params.id;
   const newLongURL = req.body.longURL;
   urlDatabase[shortURL] = newLongURL;
@@ -72,11 +71,12 @@ app.post("/urls/:id", (req, res) => {
 
 // route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
-  const username = req.cookies["username"]; // Retrieve the username from the cookies sent by the client
+  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const user = users[userId]; // Retrieve the user object from the users database using the user_id
   const longURL = urlDatabase[req.params.id]; // Get the long URL from the urlDatabase using the short URL ID
   if (longURL) {
     const templateVars = { 
-      username,
+      user,
       id: req.params.id,
       longURL
     };
@@ -98,14 +98,14 @@ app.get("/u/:id", (req, res) => {
 
 // Login route handler
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  res.cookie("username", username);
+  const userId = req.body.username; // Assuming the form field for username is used as user_id
+  res.cookie("user_id", userId);
   res.redirect("/urls");
 });
 
 // Logout route handler
 app.post("/logout", (req, res) => {
-  res.clearCookie("username"); // Clear username cookie
+  res.clearCookie("user_id"); // Clear user_id cookie
   res.redirect("/urls");
 });
 
@@ -140,8 +140,10 @@ app.get("/urls.json", (req, res) => {
 
 // route handler to render a page listing all URLs
 app.get("/urls", (req, res) => {
+  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const user = users[userId];// Retrieve the user object from the users database using the user_id
   const templateVars = {
-    username: req.cookies["username"],
+    user,
     urls: urlDatabase 
   };
   res.render("urls_index", templateVars);
