@@ -9,6 +9,16 @@ const generateRandomString = function() {
   return uniqueId;
 };
 
+// helper function to find user by email
+const findUserByEmail = function(email) {
+  for (const user of Object.values(users)) {
+    if (user.email ===email) { // Check if the current user's email matches the provided email
+      return user; // Return the user object if the email matches
+    }
+  }
+  return null; // Return null if no matching user is found
+};
+
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
@@ -119,6 +129,16 @@ app.post("/register", (req, res) => {
   const { email, password } = req.body;
   const userId = generateRandomString();
 
+  // Check if email or password is empty
+  if (!email || !password) {
+    return res.status(400).send("Email and password cannot be empty!");
+  }
+
+  // Check if the email already exists using the "findUserByEmail" helper function
+  if (findUserByEmail(email)) {
+    return res.status(400).send("Email already registered!");
+  }
+
   // Add the new user to the users object
   users[userId] = {
     id: userId,
@@ -126,7 +146,8 @@ app.post("/register", (req, res) => {
     password,
   };
 
-  console.log(users); // Log the users object to check if the new user is added
+  console.log("New user registered:", users[userId]); // Log the newly registered user
+  console.log("All users:", users); // Log the entire users object for verification
 
   res.cookie("user_id", userId); // Set the users_id cookie
 
