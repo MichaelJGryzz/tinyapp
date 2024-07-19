@@ -154,6 +154,11 @@ app.post("/register", (req, res) => {
   res.redirect("/urls"); // Redirect to /urls
 });
 
+// route handler to render the "login.ejs" template
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
 // route handler to render a JSON object listing all URLs
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
