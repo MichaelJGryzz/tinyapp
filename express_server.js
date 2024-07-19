@@ -7,7 +7,7 @@ const PORT = 8081; // default port 8081
 const generateRandomString = function() {
   const uniqueId = Math.random().toString(36).substring(2, 8);
   return uniqueId;
-}
+};
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
@@ -88,13 +88,18 @@ app.post("/login", (req, res) => {
   const username = req.body.username;
   res.cookie("username", username);
   res.redirect("/urls");
-})
+});
 
 // Logout route handler
 app.post("/logout", (req, res) => {
   res.clearCookie("username"); // Clear username cookie
   res.redirect("/urls");
-})
+});
+
+// route handler to render the "register.ejs" template
+app.get("/register", (req, res) => {
+  res.render("register");
+});
 
 // route handler to redner a JSON object listing all URLs
 app.get("/urls.json", (req, res) => {
