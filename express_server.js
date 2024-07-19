@@ -114,7 +114,26 @@ app.get("/register", (req, res) => {
   res.render("register");
 });
 
-// route handler to redner a JSON object listing all URLs
+// route handler to handle the registration form data
+app.post("/register", (req, res) => {
+  const { email, password } = req.body;
+  const userId = generateRandomString();
+
+  // Add the new user to the users object
+  users[userId] = {
+    id: userId,
+    email,
+    password,
+  };
+
+  console.log(users); // Log the users object to check if the new user is added
+
+  res.cookie("user_id", userId); // Set the users_id cookie
+
+  res.redirect("/urls"); // Redirect to /urls
+});
+
+// route handler to render a JSON object listing all URLs
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
