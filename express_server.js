@@ -135,6 +135,10 @@ app.post("/logout", (req, res) => {
 // route handler to render the "register.ejs" template and present the form to the user
 app.get("/register", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  // If the user is logged in, redirect to /urls
+  if (userId) {
+    return res.redirect("/urls");
+  }
   const user = users[userId]; // Retrieve the user object from the users database using the user_id
   const templateVars = {
     user
@@ -175,6 +179,10 @@ app.post("/register", (req, res) => {
 // route handler to render the "login.ejs" template in the browser and present the form to the user
 app.get("/login", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+   // If the user is logged in, redirect to /urls
+   if (userId) {
+    return res.redirect("/urls");
+  }
   const user = users[userId]; // Retrieve the user object from the users database using the user_id
   const templateVars = {
     user
