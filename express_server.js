@@ -20,8 +20,14 @@ const findUserByEmail = function(email) {
 };
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b2xVn2: {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "aJ48lW",
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
@@ -68,48 +74,67 @@ app.post("/urls", (req, res) => {
   }
   const shortURL = generateRandomString(); // Generate a 6 digit alphanumeric short URL ID
   const longURL = req.body.longURL; // Extract the long URL from the request body
-  urlDatabase[shortURL] = longURL; // Save the long URL and the short URL to the urlDatabase
+   // Store the long URL and the userID in the urlDatabase
+  urlDatabase[shortURL] = {
+    longURL,
+    userID: userId
+  };
   res.redirect(`/urls/${shortURL}`); // Redirect to "urls/:id"
 });
 
 // route handler to delete a specific URL resource based on its ID and redirect to "/urls"
 app.post("/urls/:id/delete", (req, res) => {
-  const shortURL = req.params.id;
-  delete urlDatabase[shortURL];
-  res.redirect("/urls");
+  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
+  if (!urlData) {
+    return res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+  }
+  if (urlData.userID !== userId) {
+    return res.status(403).send("You do not have permission to access this URL"); // Send a 403 status code if the user does not own the URL
+  }
+  delete urlDatabase[req.params.id]; // Delete the URL from the urlDatabase
+  res.redirect("/urls"); // Redirect to "/urls"
 });
 
 // route handler to update a specific URL based on its ID and redirect to "/urls"
 app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const newLongURL = req.body.longURL;
-  urlDatabase[shortURL] = newLongURL;
-  res.redirect("/urls");
+  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
+  if (!urlData) {
+    return res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+  }
+  if (urlData.userID !== userId) {
+    return res.status(403).send("You do not have permission to access this URL"); // Send a 403 status code if the user does not own the URL
+  }
+  const newLongURL = req.body.longURL; // Extract the new long URL from the request body
+  urlDatabase[req.params.id].longURL = newLongURL; // Update the long URL in the urlDatabase
+  res.redirect("/urls"); // Redirect to "/urls"
 });
 
 
 // route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
-  const user = users[userId]; // Retrieve the user object from the users database using the user_id
-  const longURL = urlDatabase[req.params.id]; // Get the long URL from the urlDatabase using the short URL ID
-  if (longURL) {
-    const templateVars = { 
-      user,
-      id: req.params.id,
-      longURL
-    };
-    res.render("urls_show", templateVars);
-  } else {
-    res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+  const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
+  if (!urlData) {
+    return res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
   }
+  if (urlData.userID !== userId) {
+    return res.status(403).send("You do not have permission to access this URL"); // Send a 403 status code if the user does not own the URL
+  }
+  const templateVars = { 
+    user: users[userId],
+    id: req.params.id,
+    longURL: urlData.longURL
+  };
+  res.render("urls_show", templateVars); // Render the "urls_show.ejs" template with the URL details
 });
 
 // route handler to redirect short URL requests to the corresponding long URL
 app.get("/u/:id", (req, res) => {
-  const longURL = urlDatabase[req.params.id] // Get the long URL from the urlDatabase using the short URL ID
-  if (longURL) {
-    res.redirect(longURL);
+  const urlData = urlDatabase[req.params.id] // Get the URL data from the urlDatabase using the short URL ID
+  if (urlData) {
+    res.redirect(urlData.longURL); // Reirect to the long URL
   } else {
     res.status(404).send("<html><body>Short URL ID not found</body></html>"); // Send a 404 status code if the short URL ID does not exist
   }
