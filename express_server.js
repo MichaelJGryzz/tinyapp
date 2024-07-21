@@ -61,7 +61,7 @@ app.get("/urls/new", (req, res) => {
 
 // route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
-  const userId = re.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
   // If the user is not logged in, respond with an HTML message 
   if (!userId) {
     return res.status(401).send("<html><body>You must be logged in to shorten URLs!</body></html>");
