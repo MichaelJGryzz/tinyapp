@@ -132,9 +132,14 @@ app.post("/logout", (req, res) => {
   res.redirect("/login"); //Redirect to "/login" page
 });
 
-// route handler to render the "register.ejs" template
+// route handler to render the "register.ejs" template and present the form to the user
 app.get("/register", (req, res) => {
-  res.render("register");
+  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const user = users[userId]; // Retrieve the user object from the users database using the user_id
+  const templateVars = {
+    user
+  };
+  res.render("register", templateVars);
 });
 
 // route handler to handle the registration form data
@@ -167,9 +172,14 @@ app.post("/register", (req, res) => {
   res.redirect("/urls"); // Redirect to /urls
 });
 
-// route handler to render the "login.ejs" template
+// route handler to render the "login.ejs" template in the browser and present the form to the user
 app.get("/login", (req, res) => {
-  res.render("login");
+  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const user = users[userId]; // Retrieve the user object from the users database using the user_id
+  const templateVars = {
+    user
+  };
+  res.render("login", templateVars);
 });
 
 // route handler to render a JSON object listing all URLs
