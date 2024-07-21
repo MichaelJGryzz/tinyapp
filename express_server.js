@@ -108,8 +108,21 @@ app.get("/u/:id", (req, res) => {
 
 // Login route handler
 app.post("/login", (req, res) => {
-  const userId = req.body.username; // Assuming the form field for username is used as user_id
-  res.cookie("user_id", userId);
+  const { email, password } = req.body; // Extract the email and password from the request body
+  const user = findUserByEmail(email); // Find the user by email using the findUserByEmail helper function
+
+  // If no user email can be found, return a response with a 403 status code
+  if (!user) {
+    return res.status(403).send("Email cannot be found!");
+  }
+
+  // If a user email is found, but the password does not match, return a response with a 403 status code
+  if (user.password !== password) {
+    return res.status(403).send("Incorrect password!");
+  }
+
+  // Set the user_id cookie with the user's id and redirect to "/urls" page
+  res.cookie("user_id", user.id);
   res.redirect("/urls");
 });
 
