@@ -129,7 +129,7 @@ app.post("/login", (req, res) => {
 // Logout route handler
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id"); // Clear user_id cookie
-  res.redirect("/urls");
+  res.redirect("/login"); //Redirect to "/login" page
 });
 
 // route handler to render the "register.ejs" template
