@@ -111,7 +111,7 @@ app.get("/u/:id", (req, res) => {
   if (longURL) {
     res.redirect(longURL);
   } else {
-    res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+    res.status(404).send("<html><body>Short URL ID not found</body></html>"); // Send a 404 status code if the short URL ID does not exist
   }
 });
 
