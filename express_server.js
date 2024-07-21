@@ -48,6 +48,10 @@ app.use(cookieParser());
 // route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  // If the user is not logged in, redirect to the /login page
+  if (!userId) {
+    res.redirect("/login");
+  }
   const user = users[userId]; // Retrieve the user object from the users database using the user_id
   const templateVars = {
     user
@@ -57,6 +61,11 @@ app.get("/urls/new", (req, res) => {
 
 // route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
+  const userId = re.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  // If the user is not logged in, respond with an HTML message 
+  if (!userId) {
+    return res.status(401).send("<html><body>You must be logged in to shorten URLs!</body></html>");
+  }
   const shortURL = generateRandomString(); // Generate a 6 digit alphanumeric short URL ID
   const longURL = req.body.longURL; // Extract the long URL from the request body
   urlDatabase[shortURL] = longURL; // Save the long URL and the short URL to the urlDatabase
