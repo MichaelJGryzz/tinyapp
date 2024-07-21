@@ -21,13 +21,13 @@
         <div class= "ml-auto d-flex align-items-center">
           <span class="nav-item mr-2" style="color: black;">Logged In As: <%= user.email %>!</span>
           <form class="form-inline" action="/logout" method="POST">
-            <button class="btn btn-outline-light" type="submit">Log Out</button>
+            <button class="btn btn-outline-dark" type="submit">Log Out</button>
           </form>
         </div>
       <% } else { %>
-        <div class="form-inline ml-auto">
-          <a class="nav-item nav-link" href="/register">Register</a>
+        <div class="navbar-nav form-inline ml-auto">
           <a class="nav-item nav-link" href="/login">Login</a>
+          <a class="nav-item nav-link" href="/register">Register</a>
         </div>
       <% } %>
     </div>
