@@ -12,7 +12,7 @@ const generateRandomString = function() {
 // Helper function to find user by email
 const findUserByEmail = function(email) {
   for (const user of Object.values(users)) {
-    if (user.email ===email) { // Check if the current user's email matches the provided email
+    if (user.email === email) { // Check if the current user's email matches the provided email
       return user; // Return the user object if the email matches
     }
   }
@@ -79,13 +79,13 @@ app.get("/urls/new", (req, res) => {
 // Route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
-  // If the user is not logged in, respond with an HTML message 
+  // If the user is not logged in, respond with an HTML message
   if (!userId) {
     return res.status(401).send("<html><body>You must be logged-in to shorten URLs!</body></html>");
   }
   const shortURL = generateRandomString(); // Generate a 6 digit alphanumeric short URL ID
   const longURL = req.body.longURL; // Extract the long URL from the request body
-   // Store the long URL and the userID in the urlDatabase
+  // Store the long URL and the userID in the urlDatabase
   urlDatabase[shortURL] = {
     longURL,
     userID: userId
@@ -148,7 +148,7 @@ app.get("/urls/:id", (req, res) => {
   }
   // Retrieve the user object from the users database using the user_id
   const user = users[userId];
-  const templateVars = { 
+  const templateVars = {
     user,
     id: req.params.id,
     longURL: urlData.longURL
@@ -158,7 +158,7 @@ app.get("/urls/:id", (req, res) => {
 
 // Route handler to redirect short URL requests to the corresponding long URL
 app.get("/u/:id", (req, res) => {
-  const urlData = urlDatabase[req.params.id] // Get the URL data from the urlDatabase using the short URL ID
+  const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
   if (urlData) {
     res.redirect(urlData.longURL); // Reirect to the long URL
   } else {
@@ -237,8 +237,8 @@ app.post("/register", (req, res) => {
 // Route handler to render the "login.ejs" template in the browser and present the form to the user
 app.get("/login", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
-   // If the user is logged in, redirect to /urls
-   if (userId) {
+  // If the user is logged in, redirect to /urls
+  if (userId) {
     return res.redirect("/urls");
   }
   const user = users[userId]; // Retrieve the user object from the users database using the user_id
