@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieParser = require("cookie-parser");
+const cookieSession = require("cookie-session");
 const bcrypt = require("bcryptjs");
 const app = express();
 const PORT = 8081; // default port 8081
@@ -60,12 +60,16 @@ app.set("view engine", "ejs");
 // Express's built in middleware function that converts the body from a Buffer to a string that we can read
 app.use(express.urlencoded({ extended: true }));
 
-// Middleware function that helps use read the values from the cookies
-app.use(cookieParser());
+// Middleware function that helps use read the values from the cookies and manage them using session
+app.use(cookieSession({
+  name: "session",
+  keys: ["MJG002204", "WhiskersSpikeRockyBB"],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}));
 
 // Route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user from the session
   // If the user is not logged in, redirect to the /login page
   if (!userId) {
     res.redirect("/login");
@@ -79,7 +83,7 @@ app.get("/urls/new", (req, res) => {
 
 // Route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user from the session
   // If the user is not logged in, respond with an HTML message
   if (!userId) {
     return res.status(401).send("<html><body>You must be logged-in to shorten URLs!</body></html>");
@@ -96,7 +100,7 @@ app.post("/urls", (req, res) => {
 
 // Route handler to delete a specific URL resource based on its ID and redirect to "/urls"
 app.post("/urls/:id/delete", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user_id from the session
   // Check if user is logged-in
   if (!userId || !users[userId])
     return res.status(401).send("You must be logged-in to delete URLs!"); // Send a 401 status code if the user is not logged-in
@@ -116,7 +120,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 // Route handler to update a specific URL based on its ID and redirect to "/urls"
 app.post("/urls/:id", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user_id from the session
   // Check if user is logged-in
   if (!userId || !users[userId]) {
     return res.status(401).send("You must be logged-in to edit URLs!"); // Send a 401 status code if the user is not logged-in
@@ -139,7 +143,7 @@ app.post("/urls/:id", (req, res) => {
 
 // Route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user_id from the session
   const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
   if (!urlData) {
     return res.status(404).send("Short URL ID not found!"); // Send a 404 status code if the short URL ID does not exist
@@ -182,25 +186,25 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Incorrect password!");
   }
 
-  // Check here if user.id exists before setting the cookie
+  // Check here if user.id exists before setting the session
   if (!users[user.id]) {
     return res.status(403).send("User ID does not exist in the database!");
   }
 
-  // Set the user_id cookie with the user's id and redirect to "/urls" page
-  res.cookie("user_id", user.id);
+  // Set the user_id session with the user's id and redirect to "/urls" page
+  req.session.user_id = user.id;
   res.redirect("/urls");
 });
 
 // Logout route handler
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id"); // Clear user_id cookie
+  req.session = null; // Clear session
   res.redirect("/login"); //Redirect to "/login" page
 });
 
 // Route handler to render the "register.ejs" template and present the form to the user
 app.get("/register", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user from the session
   // If the user is logged in, redirect to /urls
   if (userId) {
     return res.redirect("/urls");
@@ -235,13 +239,13 @@ app.post("/register", (req, res) => {
     password: hashedPassword, // Store the hashed password
   };
 
-  res.cookie("user_id", userId); // Set the users_id cookie
+  req.session.user_id = userId; // Set the users_id session
   res.redirect("/urls"); // Redirect to /urls
 });
 
 // Route handler to render the "login.ejs" template in the browser and present the form to the user
 app.get("/login", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user from the session
   // If the user is logged in, redirect to /urls
   if (userId) {
     return res.redirect("/urls");
@@ -260,7 +264,7 @@ app.get("/urls.json", (req, res) => {
 
 // Route handler to render a page listing all URLs
 app.get("/urls", (req, res) => {
-  const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  const userId = req.session.user_id; // Retrieve the user_id from the session
   // If the user is not logged in, respond with a relevent HTML error message with a 401 status code
   if (!userId || !users[userId]) {
     return res.status(401).send("<html><body>You must be logged-in to view your URLs!<a href='/login'>Log in</a> or <a href='/register'>Register</a></body></html>");
