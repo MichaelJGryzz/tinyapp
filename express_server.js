@@ -3,13 +3,13 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const PORT = 8081; // default port 8081
 
-// function to generate a random string of 6 alphanumeric characters
+// Function to generate a random string of 6 alphanumeric characters
 const generateRandomString = function() {
   const uniqueId = Math.random().toString(36).substring(2, 8);
   return uniqueId;
 };
 
-// helper function to find user by email
+// Helper function to find user by email
 const findUserByEmail = function(email) {
   for (const user of Object.values(users)) {
     if (user.email ===email) { // Check if the current user's email matches the provided email
@@ -19,7 +19,7 @@ const findUserByEmail = function(email) {
   return null; // Return null if no matching user is found
 };
 
-// function that returns the URLs where the userID is equal to the id of the currently logged-in user
+// Function that returns the URLs where the userID is equal to the id of the currently logged-in user
 const urlsForUser = function(id) {
   const userUrls = {};
   for (const shortURL in urlDatabase) {
@@ -62,7 +62,7 @@ app.use(express.urlencoded({ extended: true }));
 // Middleware function that helps use read the values from the cookies
 app.use(cookieParser());
 
-// route handler to render the "urls_new.ejs" template in the browser and present the form to the user
+// Route handler to render the "urls_new.ejs" template in the browser and present the form to the user
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
   // If the user is not logged in, redirect to the /login page
@@ -76,12 +76,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-// route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
+// Route handler to generate a unique id, save it and the long url to the urlDatabase and redirect to "/urls/:id"
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
   // If the user is not logged in, respond with an HTML message 
   if (!userId) {
-    return res.status(401).send("<html><body>You must be logged in to shorten URLs!</body></html>");
+    return res.status(401).send("<html><body>You must be logged-in to shorten URLs!</body></html>");
   }
   const shortURL = generateRandomString(); // Generate a 6 digit alphanumeric short URL ID
   const longURL = req.body.longURL; // Extract the long URL from the request body
@@ -93,29 +93,42 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${shortURL}`); // Redirect to "urls/:id"
 });
 
-// route handler to delete a specific URL resource based on its ID and redirect to "/urls"
+// Route handler to delete a specific URL resource based on its ID and redirect to "/urls"
 app.post("/urls/:id/delete", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
+  // Check if user is logged-in
+  if (!userId || !users[userId])
+    return res.status(401).send("You must be logged-in to delete URLs!"); // Send a 401 status code if the user is not logged-in
+
   const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
+  // Check if URL exists
   if (!urlData) {
-    return res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+    return res.status(404).send("Short URL ID not found!"); // Send a 404 status code if the short URL ID does not exist
   }
+  // Check if user owns the URL
   if (urlData.userID !== userId) {
-    return res.status(403).send("You do not have permission to access this URL"); // Send a 403 status code if the user does not own the URL
+    return res.status(403).send("You do not have permission to access this URL!"); // Send a 403 status code if the user does not own the URL
   }
   delete urlDatabase[req.params.id]; // Delete the URL from the urlDatabase
   res.redirect("/urls"); // Redirect to "/urls"
 });
 
-// route handler to update a specific URL based on its ID and redirect to "/urls"
+// Route handler to update a specific URL based on its ID and redirect to "/urls"
 app.post("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
-  const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
-  if (!urlData) {
-    return res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+  // Check if user is logged-in
+  if (!userId || !users[userId]) {
+    return res.status(401).send("You must be logged-in to edit URLs!"); // Send a 401 status code if the user is not logged-in
   }
+
+  const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
+  // Check if URL exists
+  if (!urlData) {
+    return res.status(404).send("Short URL ID not found!"); // Send a 404 status code if the short URL ID does not exist
+  }
+  // Check if user owns the URL
   if (urlData.userID !== userId) {
-    return res.status(403).send("You do not have permission to access this URL"); // Send a 403 status code if the user does not own the URL
+    return res.status(403).send("You do not have permission to access this URL!"); // Send a 403 status code if the user does not own the URL
   }
   const newLongURL = req.body.longURL; // Extract the new long URL from the request body
   urlDatabase[req.params.id].longURL = newLongURL; // Update the long URL in the urlDatabase
@@ -123,7 +136,7 @@ app.post("/urls/:id", (req, res) => {
 });
 
 
-// route handler to render details of a specific URL based on its ID
+// Route handler to render details of a specific URL based on its ID
 app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
   const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
@@ -143,13 +156,13 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars); // Render the "urls_show.ejs" template with the URL details
 });
 
-// route handler to redirect short URL requests to the corresponding long URL
+// Route handler to redirect short URL requests to the corresponding long URL
 app.get("/u/:id", (req, res) => {
   const urlData = urlDatabase[req.params.id] // Get the URL data from the urlDatabase using the short URL ID
   if (urlData) {
     res.redirect(urlData.longURL); // Reirect to the long URL
   } else {
-    res.status(404).send("<html><body>Short URL ID not found</body></html>"); // Send a 404 status code if the short URL ID does not exist
+    res.status(404).send("<html><body>Short URL ID not found!</body></html>"); // Send a 404 status code if the short URL ID does not exist
   }
 });
 
@@ -170,7 +183,7 @@ app.post("/login", (req, res) => {
 
   // Check here if user.id exists before setting the cookie
   if (!users[user.id]) {
-    return res.status(403).send("User ID does not exist in the database.");
+    return res.status(403).send("User ID does not exist in the database!");
   }
 
   // Set the user_id cookie with the user's id and redirect to "/urls" page
@@ -184,7 +197,7 @@ app.post("/logout", (req, res) => {
   res.redirect("/login"); //Redirect to "/login" page
 });
 
-// route handler to render the "register.ejs" template and present the form to the user
+// Route handler to render the "register.ejs" template and present the form to the user
 app.get("/register", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
   // If the user is logged in, redirect to /urls
@@ -198,7 +211,7 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-// route handler to handle the registration form data
+// Route handler to handle the registration form data
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
   const userId = generateRandomString();
@@ -221,7 +234,7 @@ app.post("/register", (req, res) => {
   res.redirect("/urls"); // Redirect to /urls
 });
 
-// route handler to render the "login.ejs" template in the browser and present the form to the user
+// Route handler to render the "login.ejs" template in the browser and present the form to the user
 app.get("/login", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user from the cookies sent by the client
    // If the user is logged in, redirect to /urls
@@ -235,17 +248,17 @@ app.get("/login", (req, res) => {
   res.render("login", templateVars);
 });
 
-// route handler to render a JSON object listing all URLs
+// Route handler to render a JSON object listing all URLs
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// route handler to render a page listing all URLs
+// Route handler to render a page listing all URLs
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
   // If the user is not logged in, respond with a relevent HTML error message with a 401 status code
   if (!userId || !users[userId]) {
-    return res.status(401).send("<html><body>You must be logged in to view your URLs! <a href='/login'>Log in</a> or <a href='/register'>Register</a></body></html>");
+    return res.status(401).send("<html><body>You must be logged-in to view your URLs!<a href='/login'>Log in</a> or <a href='/register'>Register</a></body></html>");
   }
   // Retrieve the user object from the users database using the user_id
   const user = users[userId];
