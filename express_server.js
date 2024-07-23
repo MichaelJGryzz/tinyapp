@@ -19,6 +19,17 @@ const findUserByEmail = function(email) {
   return null; // Return null if no matching user is found
 };
 
+// function that returns the URLs where the userID is equal to the id of the currently logged-in user
+const urlsForUser = function(id) {
+  const userUrls = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userUrls[shortURL] = urlDatabase[shortURL]; // If userID matches the id, add the URL entry to the userUrls object
+    }
+  }
+  return userUrls; // Return the filtered userUrls object containing only URLs for the given user ID
+};
+
 const urlDatabase = {
   b2xVn2: {
     longURL: "http://www.lighthouselabs.ca",
@@ -117,13 +128,15 @@ app.get("/urls/:id", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
   const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
   if (!urlData) {
-    return res.status(404).send("Short URL ID not found"); // Send a 404 status code if the short URL ID does not exist
+    return res.status(404).send("Short URL ID not found!"); // Send a 404 status code if the short URL ID does not exist
   }
   if (urlData.userID !== userId) {
-    return res.status(403).send("You do not have permission to access this URL"); // Send a 403 status code if the user does not own the URL
+    return res.status(403).send("You do not have permission to access this URL!"); // Send a 403 status code if the user does not own the URL
   }
+  // Retrieve the user object from the users database using the user_id
+  const user = users[userId];
   const templateVars = { 
-    user: users[userId],
+    user,
     id: req.params.id,
     longURL: urlData.longURL
   };
@@ -155,6 +168,11 @@ app.post("/login", (req, res) => {
     return res.status(403).send("Incorrect password!");
   }
 
+  // Check here if user.id exists before setting the cookie
+  if (!users[user.id]) {
+    return res.status(403).send("User ID does not exist in the database.");
+  }
+
   // Set the user_id cookie with the user's id and redirect to "/urls" page
   res.cookie("user_id", user.id);
   res.redirect("/urls");
@@ -184,17 +202,14 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
   const userId = generateRandomString();
-
   // Check if email or password is empty
   if (!email || !password) {
     return res.status(400).send("Email and password cannot be empty!");
   }
-
   // Check if the email already exists using the "findUserByEmail" helper function
   if (findUserByEmail(email)) {
     return res.status(400).send("Email already registered!");
   }
-
   // Add the new user to the users object
   users[userId] = {
     id: userId,
@@ -202,11 +217,7 @@ app.post("/register", (req, res) => {
     password,
   };
 
-  console.log("New user registered:", users[userId]); // Log the newly registered user
-  console.log("All users:", users); // Log the entire users object for verification
-
   res.cookie("user_id", userId); // Set the users_id cookie
-
   res.redirect("/urls"); // Redirect to /urls
 });
 
@@ -232,12 +243,19 @@ app.get("/urls.json", (req, res) => {
 // route handler to render a page listing all URLs
 app.get("/urls", (req, res) => {
   const userId = req.cookies["user_id"]; // Retrieve the user_id from the cookies sent by the client
-  const user = users[userId];// Retrieve the user object from the users database using the user_id
+  // If the user is not logged in, respond with a relevent HTML error message with a 401 status code
+  if (!userId || !users[userId]) {
+    return res.status(401).send("<html><body>You must be logged in to view your URLs! <a href='/login'>Log in</a> or <a href='/register'>Register</a></body></html>");
+  }
+  // Retrieve the user object from the users database using the user_id
+  const user = users[userId];
+  // Filter URLs to only include those created by the logged-in user
+  const userUrls = urlsForUser(userId);
   const templateVars = {
     user,
-    urls: urlDatabase 
+    urls: userUrls
   };
-  res.render("urls_index", templateVars);
+  res.render("urls_index", templateVars); // Render the "urls_index.ejs" template with the filtered URLs
 });
 
 app.get("/hello", (req, res) => {
