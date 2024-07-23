@@ -178,7 +178,7 @@ app.post("/login", (req, res) => {
   }
 
   // If a user email is found, but the password does not match, return a response with a 403 status code
-  if (user.password !== password) {
+  if (!bcrypt.compareSync(password, user.password)) {
     return res.status(403).send("Incorrect password!");
   }
 
