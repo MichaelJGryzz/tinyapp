@@ -10,15 +10,8 @@ const generateRandomString = function() {
   return uniqueId;
 };
 
-// Helper function to find user by email
-const findUserByEmail = function(email, userDatabase) {
-  for (const user of Object.values(userDatabase)) {
-    if (user.email === email) { // Check if the current user's email matches the provided email
-      return user; // Return the user object if the email matches
-    }
-  }
-  return null; // Return null if no matching user is found
-};
+// Require findUserByEmail helper function to find user by email
+const { findUserByEmail } = require("./helpers");
 
 // Function that returns the URLs where the userID is equal to the id of the currently logged-in user
 const urlsForUser = function(id) {
