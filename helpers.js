@@ -5,7 +5,7 @@ const findUserByEmail = function(email, userDatabase) {
       return user; // Return the user object if the email matches
     }
   }
-  return null; // Return null if no matching user is found
+  return undefined; // Return undefined if no matching user is found
 };
 
 // Export helper function to make it available throughout the project
