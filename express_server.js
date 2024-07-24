@@ -13,16 +13,8 @@ const generateRandomString = function() {
 // Require findUserByEmail helper function to find user by email
 const { findUserByEmail } = require("./helpers");
 
-// Function that returns the URLs where the userID is equal to the id of the currently logged-in user
-const urlsForUser = function(id) {
-  const userUrls = {};
-  for (const shortURL in urlDatabase) {
-    if (urlDatabase[shortURL].userID === id) {
-      userUrls[shortURL] = urlDatabase[shortURL]; // If userID matches the id, add the URL entry to the userUrls object
-    }
-  }
-  return userUrls; // Return the filtered userUrls object containing only URLs for the given user ID
-};
+// Require urlsForUser function that returns the URLs where the userID is equal to the id of the currently logged-in user
+const { urlsForUser } = require("./helpers");
 
 const urlDatabase = {
   b2xVn2: {
