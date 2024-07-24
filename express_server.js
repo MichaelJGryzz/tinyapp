@@ -11,8 +11,8 @@ const generateRandomString = function() {
 };
 
 // Helper function to find user by email
-const findUserByEmail = function(email) {
-  for (const user of Object.values(users)) {
+const findUserByEmail = function(email, userDatabase) {
+  for (const user of Object.values(userDatabase)) {
     if (user.email === email) { // Check if the current user's email matches the provided email
       return user; // Return the user object if the email matches
     }
@@ -42,7 +42,7 @@ const urlDatabase = {
   },
 };
 
-const users = {
+const userDatabase = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -74,7 +74,7 @@ app.get("/urls/new", (req, res) => {
   if (!userId) {
     res.redirect("/login");
   }
-  const user = users[userId]; // Retrieve the user object from the users database using the user_id
+  const user = userDatabase[userId]; // Retrieve the user object from the userDatabase using the user_id
   const templateVars = {
     user
   };
@@ -102,7 +102,7 @@ app.post("/urls", (req, res) => {
 app.post("/urls/:id/delete", (req, res) => {
   const userId = req.session.user_id; // Retrieve the user_id from the session
   // Check if user is logged-in
-  if (!userId || !users[userId])
+  if (!userId || !userDatabase[userId])
     return res.status(401).send("You must be logged-in to delete URLs!"); // Send a 401 status code if the user is not logged-in
 
   const urlData = urlDatabase[req.params.id]; // Get the URL data from the urlDatabase using the short URL ID
@@ -122,7 +122,7 @@ app.post("/urls/:id/delete", (req, res) => {
 app.post("/urls/:id", (req, res) => {
   const userId = req.session.user_id; // Retrieve the user_id from the session
   // Check if user is logged-in
-  if (!userId || !users[userId]) {
+  if (!userId || !userDatabase[userId]) {
     return res.status(401).send("You must be logged-in to edit URLs!"); // Send a 401 status code if the user is not logged-in
   }
 
@@ -151,8 +151,8 @@ app.get("/urls/:id", (req, res) => {
   if (urlData.userID !== userId) {
     return res.status(403).send("You do not have permission to access this URL!"); // Send a 403 status code if the user does not own the URL
   }
-  // Retrieve the user object from the users database using the user_id
-  const user = users[userId];
+  // Retrieve the user object from the userDatabase using the user_id
+  const user = userDatabase[userId];
   const templateVars = {
     user,
     id: req.params.id,
@@ -174,7 +174,7 @@ app.get("/u/:id", (req, res) => {
 // Login route handler
 app.post("/login", (req, res) => {
   const { email, password } = req.body; // Extract the email and password from the request body
-  const user = findUserByEmail(email); // Find the user by email using the findUserByEmail helper function
+  const user = findUserByEmail(email, userDatabase); // Find the user by email using the findUserByEmail helper function
 
   // If no user email can be found, return a response with a 403 status code
   if (!user) {
@@ -187,7 +187,7 @@ app.post("/login", (req, res) => {
   }
 
   // Check here if user.id exists before setting the session
-  if (!users[user.id]) {
+  if (!userDatabase[user.id]) {
     return res.status(403).send("User ID does not exist in the database!");
   }
 
@@ -209,7 +209,7 @@ app.get("/register", (req, res) => {
   if (userId) {
     return res.redirect("/urls");
   }
-  const user = users[userId]; // Retrieve the user object from the users database using the user_id
+  const user = userDatabase[userId]; // Retrieve the user object from the userDatabase using the user_id
   const templateVars = {
     user
   };
@@ -225,15 +225,15 @@ app.post("/register", (req, res) => {
     return res.status(400).send("Email and password cannot be empty!");
   }
   // Check if the email already exists using the "findUserByEmail" helper function
-  if (findUserByEmail(email)) {
+  if (findUserByEmail(email, userDatabase)) {
     return res.status(400).send("Email already registered!");
   }
 
   // Hash the password using bgrypt
   const hashedPassword = bcrypt.hashSync(password, 10);
 
-  // Add the new user to the users object
-  users[userId] = {
+  // Add the new user to the userDatabase object
+  userDatabase[userId] = {
     id: userId,
     email,
     password: hashedPassword, // Store the hashed password
@@ -250,7 +250,7 @@ app.get("/login", (req, res) => {
   if (userId) {
     return res.redirect("/urls");
   }
-  const user = users[userId]; // Retrieve the user object from the users database using the user_id
+  const user = userDatabase[userId]; // Retrieve the user object from the userDatabase using the user_id
   const templateVars = {
     user
   };
@@ -266,11 +266,11 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls", (req, res) => {
   const userId = req.session.user_id; // Retrieve the user_id from the session
   // If the user is not logged in, respond with a relevent HTML error message with a 401 status code
-  if (!userId || !users[userId]) {
+  if (!userId || !userDatabase[userId]) {
     return res.status(401).send("<html><body>You must be logged-in to view your URLs!<a href='/login'>Log in</a> or <a href='/register'>Register</a></body></html>");
   }
-  // Retrieve the user object from the users database using the user_id
-  const user = users[userId];
+  // Retrieve the user object from the userDatabase using the user_id
+  const user = userDatabase[userId];
   // Filter URLs to only include those created by the logged-in user
   const userUrls = urlsForUser(userId);
   const templateVars = {
