@@ -17,7 +17,7 @@ const testUsers = {
 
 // Describe block to group tests related to the findUserByEmail function
 describe('findUserByEmail', function() {
-  // Test Case #1 - checks if the function returns the correct user
+  // Test Case # 1 - checks if the function returns the correct user
   it('should return a user with valid email', function() {
     const user = findUserByEmail("user@example.com", testUsers);
     const expectedUserID = "userRandomID";
@@ -27,7 +27,7 @@ describe('findUserByEmail', function() {
     assert.equal(user.id, expectedUserID, 'User ID should be userRandomID');
   });
 
-  // Test Case #2 - checks if undefined is returned when we pass in an email that is not in our users database
+  // Test Case # 2 - checks if undefined is returned when we pass in an email that is not in our users database
   it('should return undefined for an email not in the database', function() {
     const user = findUserByEmail("nonexistent@example.com", testUsers);
     
