@@ -13,7 +13,7 @@ const generateRandomString = function() {
 // Require findUserByEmail helper function to find user by email
 const { findUserByEmail } = require("./helpers");
 
-// Require urlsForUser function that returns the URLs where the userID is equal to the id of the currently logged-in user
+// Require urlsForUser helper function that returns the URLs where the userID is equal to the id of the currently logged-in user
 const { urlsForUser } = require("./helpers");
 
 const urlDatabase = {
@@ -257,7 +257,7 @@ app.get("/urls", (req, res) => {
   // Retrieve the user object from the userDatabase using the user_id
   const user = userDatabase[userId];
   // Filter URLs to only include those created by the logged-in user
-  const userUrls = urlsForUser(userId);
+  const userUrls = urlsForUser(userId, urlDatabase); // Pass urlDatabase as the second argument
   const templateVars = {
     user,
     urls: userUrls
