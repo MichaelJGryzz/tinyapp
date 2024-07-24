@@ -17,6 +17,7 @@ const testUsers = {
 
 // Describe block to group tests related to the findUserByEmail function
 describe('findUserByEmail', function() {
+
   // Test Case # 1 - checks if the function returns the correct user
   it('should return a user with valid email', function() {
     const user = findUserByEmail("user@example.com", testUsers);
@@ -38,6 +39,7 @@ describe('findUserByEmail', function() {
 
 // Describe block to group tests related to the urlsForUser function
 describe('urlsForUser', function() {
+  
   // Test Case # 3 - checks if only urls that belong to the specified user are returned
   it('should return only URLs that belong to the specified user', function() {
     // Sample urlDatabase with URLs and associated user IDs
